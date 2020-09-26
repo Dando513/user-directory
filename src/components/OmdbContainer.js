@@ -9,27 +9,25 @@ import API from "../utils/API";
 
 class OmdbContainer extends Component {
   state = {
-    result: {},
+    result: [],
     search: ""
   };
 
   // When this component mounts, search for the movie "The Matrix"
   componentDidMount() {
-    this.searchMovies("The Matrix");
+    API.search()
+      .then(res => this.setState({ result: res.data.results }, () => console.log(this.state)))
+      .catch(err => console.log(err));
   }
 
-  searchMovies = query => {
-    API.search(query)
-      .then(res => this.setState({ result: res.data }))
-      .catch(err => console.log(err));
-  };
+
 
   handleInputChange = event => {
     const value = event.target.value;
     const name = event.target.name;
     this.setState({
       [name]: value
-    });
+    }, () => console.log(this.state));
   };
 
   // When the form is submitted, search the OMDB API for the value of `this.state.search`
@@ -44,19 +42,33 @@ class OmdbContainer extends Component {
         <Row>
           <Col size="md-8">
             <Card
-              heading={this.state.result.Title || "Search for a Movie to Begin"}
-            >
-              {this.state.result.Title ? (
-                <MovieDetail
-                  title={this.state.result.Title}
-                  src={this.state.result.Poster}
-                  director={this.state.result.Director}
-                  genre={this.state.result.Genre}
-                  released={this.state.result.Released}
-                />
-              ) : (
-                <h3>No Results to Display</h3>
-              )}
+              heading={"User Directory"}
+            
+            >{this.state.result.length > 0 ?
+            <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">City</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+               {this.state.result.filter(item=>item.name.first.includes(this.state.search)).map((item, i) => (
+                <tr key={i}>
+                
+                <th scope="row">{item.location.city}</th>
+                <td>{item.name.first}</td>
+                <td>{item.name.last}</td>
+                <td>{item.email}</td>
+              </tr>
+              )) }
+                  </tbody>
+                </table> 
+                : (
+                  <h3>No Results to Display</h3>
+                )}   
             </Card>
           </Col>
           <Col size="md-4">
